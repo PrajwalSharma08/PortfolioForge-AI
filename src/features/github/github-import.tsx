@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { GitHubRepository, GitHubImportState, GitHubProfile } from "@/types/portfolio"
+import { fetchUserReadme, parseReadmeContent } from "./github-api"
 
 export interface ExtractedReadmeData {
   about: string
@@ -55,10 +56,11 @@ export function GitHubImport({ onComplete, onSkip }: GitHubImportProps) {
     setState((prev) => ({ ...prev, loading: true, error: null }))
 
     try {
-      const [profileRes, reposRes, readmeRes] = await Promise.all([
-        fetch(`/api/github/profile?username=${state.username}`),
-        fetch(`/api/github/repos?username=${state.username}`),
-        fetch(`/api/github/readme?username=${state.username}`).catch(() => null),
+      const cleanUsername = state.username.trim().replace(/^@/, "")
+      const [profileRes, reposRes, readmeRaw] = await Promise.all([
+        fetch(`https://api.github.com/users/${cleanUsername}`),
+        fetch(`https://api.github.com/users/${cleanUsername}/repos?sort=updated&per_page=100&type=owner`),
+        fetchUserReadme(cleanUsername).catch(() => null),
       ])
 
       if (!profileRes.ok) throw new Error("Profile not found")
@@ -68,15 +70,8 @@ export function GitHubImport({ onComplete, onSkip }: GitHubImportProps) {
       const repositories = await reposRes.json()
 
       let readmeExtracted: ExtractedReadmeData | null = null
-      if (readmeRes && readmeRes.ok) {
-        try {
-          const readmeJson = await readmeRes.json()
-          if (readmeJson.found && readmeJson.extracted) {
-            readmeExtracted = readmeJson.extracted
-          }
-        } catch {
-          // ignore
-        }
+      if (readmeRaw) {
+        readmeExtracted = parseReadmeContent(readmeRaw)
       }
 
       const selectedRepos = new Set<number>(repositories.slice(0, 6).map((r: GitHubRepository) => r.id))

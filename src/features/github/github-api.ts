@@ -116,3 +116,65 @@ export function normalizeGitHubRepository(repo: GitHubRepository) {
     updatedAt: repo.updatedAt,
   }
 }
+
+export async function fetchUserReadme(username: string): Promise<string | null> {
+  const branches = ["main", "master"]
+  for (const branch of branches) {
+    try {
+      const url = `https://raw.githubusercontent.com/${username}/${username}/${branch}/README.md`
+      const res = await fetch(url)
+      if (res.ok) {
+        return await res.text()
+      }
+    } catch {
+      // try next
+    }
+  }
+  return null
+}
+
+export function parseReadmeContent(raw: string) {
+  const cleanLines = raw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => {
+      if (!line) return false
+      if (line.startsWith("<") && line.endsWith(">")) return false
+      if (line.startsWith("![") && line.endsWith(")")) return false
+      if (line.startsWith("[![") && line.endsWith(")")) return false
+      return true
+    })
+
+  const introParagraphs = cleanLines
+    .filter((line) => !line.startsWith("#") && line.length > 25)
+    .slice(0, 3)
+    .join(" ")
+
+  const TECH_KEYWORDS = [
+    "React", "Next.js", "TypeScript", "JavaScript", "Node.js", "Python", "Java", "C++", "C#",
+    "Tailwind CSS", "PostgreSQL", "MongoDB", "MySQL", "Redis", "Docker", "Kubernetes", "AWS",
+    "Express", "Django", "Flask", "Spring Boot", "Git", "GraphQL", "REST API", "HTML5", "CSS3",
+    "Firebase", "Supabase", "Prisma", "Linux", "Figma", "Redux", "Vite"
+  ]
+
+  const detectedSkills = TECH_KEYWORDS.filter((tech) => {
+    const regex = new RegExp(`\\b${tech.replace(".", "\\.")}\\b`, "i")
+    return regex.test(raw)
+  })
+
+  const leetcodeMatch = raw.match(/https?:\/\/(www\.)?leetcode\.com\/([a-zA-Z0-9_-]+)/i)
+  const codeforcesMatch = raw.match(/https?:\/\/(www\.)?codeforces\.com\/profile\/([a-zA-Z0-9_-]+)/i)
+  const linkedinMatch = raw.match(/https?:\/\/(www\.)?linkedin\.com\/in\/([a-zA-Z0-9_-]+)/i)
+  const twitterMatch = raw.match(/https?:\/\/(www\.)?(twitter|x)\.com\/([a-zA-Z0-9_]+)/i)
+
+  return {
+    about: introParagraphs.slice(0, 400),
+    skills: detectedSkills,
+    socialLinks: {
+      leetcode: leetcodeMatch ? leetcodeMatch[0] : null,
+      codeforces: codeforcesMatch ? codeforcesMatch[0] : null,
+      linkedin: linkedinMatch ? linkedinMatch[0] : null,
+      twitter: twitterMatch ? twitterMatch[0] : null,
+    },
+  }
+}

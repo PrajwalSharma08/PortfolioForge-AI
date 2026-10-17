@@ -1,5 +1,9 @@
-﻿import { Metadata } from "next"
+import { Metadata } from "next"
 import PreviewPage from "@/app/preview/page"
+
+export function generateStaticParams() {
+  return [{ id: "latest" }, { id: "preview" }]
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params

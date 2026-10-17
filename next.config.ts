@@ -1,11 +1,14 @@
 import type { NextConfig } from "next"
 
+const isGithubPages = process.env.GITHUB_PAGES === "true"
+
 const nextConfig: NextConfig = {
+  output: "export",
+  basePath: isGithubPages ? "/PortfolioForge-AI" : "",
+  trailingSlash: true,
   reactStrictMode: true,
-  experimental: {
-    optimizePackageImports: ["lucide-react", "framer-motion"],
-  },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
@@ -20,31 +23,6 @@ const nextConfig: NextConfig = {
         hostname: "github.com",
       },
     ],
-  },
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "X-DNS-Prefetch-Control",
-            value: "on",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
-          },
-        ],
-      },
-    ]
   },
 }
 

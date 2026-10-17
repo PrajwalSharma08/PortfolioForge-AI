@@ -89,18 +89,7 @@ export function SocialLinksBuilder({ value, onChange, disabled }: SocialLinksBui
     }
   }
 
-  const validateUrl = async (url: string) => {
-    if (!url) return
-    setValidating(true)
-    try {
-      const response = await fetch(`/api/validate-url?url=${encodeURIComponent(url)}`, { method: "HEAD" })
-      return response.ok
-    } catch {
-      return false
-    } finally {
-      setValidating(false)
-    }
-  }
+
 
   return (
     <div className="space-y-4">
