@@ -695,7 +695,7 @@ export function SectionRenderer({ section, portfolio }: { section: SectionConfig
           }}
         >
           <p style={{ fontSize: "0.875rem", fontWeight: isNeo ? 700 : 400 }}>
-            &copy; {new Date().getFullYear()} {portfolio.profile.fullName}. Crafted with PortfolioForge AI.
+            &copy; {new Date().getFullYear()} {portfolio.profile.fullName}. Crafted with HackForge AI.
           </p>
         </footer>
       )

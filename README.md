@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ PortfolioForge AI
+# ⚡ HackForge AI
 
 ### *Craft Dribbble-Grade Developer Portfolios in Minutes with AI*
 
@@ -9,6 +9,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 [![Vitest](https://img.shields.io/badge/Vitest-Passing-6E9F18?style=for-the-badge&logo=vitest)](https://vitest.dev/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen?style=for-the-badge&logo=github)](https://prajwalsharma08.github.io/Hackforge-AI/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 <p align="center">
@@ -16,8 +17,12 @@
 </p>
 
 <p align="center">
-  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FPrajwalSharma08%2FPortfolioForge-AI">
-    <img src="https://vercel.com/button" alt="Deploy with Vercel"/>
+  <a href="https://prajwalsharma08.github.io/Hackforge-AI/">
+    <b>🌐 Live Demo on GitHub Pages</b>
+  </a>
+  &nbsp;•&nbsp;
+  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FPrajwalSharma08%2FHackforge-AI">
+    <b>▲ Deploy to Vercel</b>
   </a>
 </p>
 
@@ -27,9 +32,9 @@
 
 ---
 
-## 🌟 Why PortfolioForge AI?
+## 🌟 Why HackForge AI?
 
-Traditional portfolio builders produce bland, cookie-cutter websites with dull templates. **PortfolioForge AI** combines **Dribbble-level aesthetics**, **smart onboarding tailoring (B.Tech College Students vs. Seasoned Pros)**, **GitHub profile & README data extraction**, and **live visual design editing** to deliver a portfolio that actually gets you hired.
+Traditional portfolio builders produce bland, cookie-cutter websites with dull templates. **HackForge AI** combines **Dribbble-level aesthetics**, **smart onboarding tailoring (B.Tech College Students vs. Seasoned Pros)**, **GitHub profile & README data extraction**, and **live visual design editing** to deliver a portfolio that actually gets you hired.
 
 ```
        ┌────────────────┐
@@ -68,7 +73,7 @@ Traditional portfolio builders produce bland, cookie-cutter websites with dull t
 
 ### 🐙 3. GitHub Profile & README.md Integration
 - Connect any GitHub username to automatically fetch public repositories.
-- **Intelligent README Parser**: Reads user's `username/README.md` to extract bio, tech stack, and featured projects automatically.
+- **Intelligent README Parser**: Reads user's `username/README.md` to extract bio, tech stack, and featured projects automatically directly in the browser.
 
 ### 📄 4. PDF CV / Resume Support
 - Upload PDF resumes directly (Base64 encoding).
@@ -80,7 +85,7 @@ Traditional portfolio builders produce bland, cookie-cutter websites with dull t
 - Drag-and-drop / toggle section ordering (Hero, About, Skills, Projects, Experience, Education, Certifications, Contact, Footer).
 
 ### 📦 6. 1-Click Code Export
-- Export complete standalone portfolio code bundled in a clean `.zip` file using `JSZip` and `file-saver`, ready to deploy on **Vercel**, **GitHub Pages**, or **Netlify**.
+- Export complete standalone portfolio code bundled in a clean `.zip` file using `JSZip` and `file-saver`, ready to deploy on **GitHub Pages**, **Vercel**, or **Netlify**.
 
 ---
 
@@ -99,7 +104,7 @@ Traditional portfolio builders produce bland, cookie-cutter websites with dull t
 
 ## 🛠 Tech Stack & Architecture
 
-- **Core Framework**: [Next.js 16](https://nextjs.org/) (App Router, Turbopack & Webpack support)
+- **Core Framework**: [Next.js 16](https://nextjs.org/) (Static Export & Webpack engine support)
 - **Language**: [TypeScript 5.7](https://www.typescriptlang.org/) with strict type checking
 - **UI & Layout**: [Tailwind CSS v4](https://tailwindcss.com/) + [Radix UI](https://www.radix-ui.com/) primitives
 - **Icons**: [Lucide React](https://lucide.dev/)
@@ -114,15 +119,14 @@ Traditional portfolio builders produce bland, cookie-cutter websites with dull t
 ## 📂 Project Structure
 
 ```
-portfolio-forge/
+hackforge-ai/
 ├── .github/
-│   └── workflows/ci.yml       # GitHub Actions CI (Lint, Typecheck, Test, Build)
+│   └── workflows/
+│       ├── ci.yml             # GitHub Actions CI (Lint, Typecheck, Test, Build)
+│       └── deploy-pages.yml   # Automatic GitHub Pages Deployment
 ├── public/                    # Static assets & icons
 ├── src/
 │   ├── app/
-│   │   ├── api/
-│   │   │   ├── github/readme/ # GitHub profile README.md parser endpoint
-│   │   │   └── github/repos/  # GitHub repositories fetcher endpoint
 │   │   ├── editor/            # Real-time visual editor & preview page
 │   │   ├── onboarding/        # Multi-step questionnaire & profile builder
 │   │   ├── preview/           # Distraction-free full portfolio preview page
@@ -133,7 +137,7 @@ portfolio-forge/
 │   │   └── ui/                # Accessible design system components (buttons, cards, inputs)
 │   ├── features/
 │   │   ├── ai/                # AI generation logic (mock, OpenAI, Anthropic abstraction)
-│   │   ├── github/            # GitHub integration adapter
+│   │   ├── github/            # GitHub integration adapter & client parser
 │   │   ├── questionnaire/     # Dynamic form builders (Project, Experience, Education)
 │   │   └── themes/            # Theme tokens, palettes & configurations
 │   ├── lib/                   # Utility helpers & demo data
@@ -157,8 +161,8 @@ npm -v
 
 ### 2. Clone the Repository
 ```bash
-git clone https://github.com/Prajwalsharma08/PortfolioForge-AI.git
-cd PortfolioForge-AI
+git clone https://github.com/PrajwalSharma08/Hackforge-AI.git
+cd Hackforge-AI
 ```
 
 ### 3. Install Dependencies
@@ -170,7 +174,6 @@ npm install
 ```bash
 cp .env.example .env.local
 ```
-*(GitHub token is optional but recommended if you want higher GitHub API rate limits).*
 
 ### 5. Launch Development Server
 ```bash
@@ -195,27 +198,18 @@ npm run lint
 # Run Vitest unit tests
 npm run test -- --run
 
-# Create a production build
+# Create a production build (Static Export for GitHub Pages)
 npm run build
 ```
-
----
-
-## 💡 Future Roadmap
-
-- [ ] **1-Click Cloud Deployment**: Direct push to Vercel and Netlify via API tokens.
-- [ ] **AI Resume Scanner**: Auto-populate portfolio by parsing uploaded PDF resumes using Gemini 2.0.
-- [ ] **Custom Subdomains**: Free `username.portfolioforge.app` live hosting.
-- [ ] **Loom & Video Embeds**: Interactive video demo modals inside project showcase cards.
-- [ ] **Direct Contact Form**: Receive visitor messages directly to email via Resend integration.
 
 ---
 
 ## 👨‍💻 Author
 
 **Prajwal Sharma**
-- GitHub: [@Prajwalsharma08](https://github.com/Prajwalsharma08)
-- Project: [PortfolioForge-AI](https://github.com/Prajwalsharma08/PortfolioForge-AI)
+- GitHub: [@PrajwalSharma08](https://github.com/PrajwalSharma08)
+- Project: [Hackforge-AI](https://github.com/PrajwalSharma08/Hackforge-AI)
+- Live Website: [https://prajwalsharma08.github.io/Hackforge-AI/](https://prajwalsharma08.github.io/Hackforge-AI/)
 
 ---
 

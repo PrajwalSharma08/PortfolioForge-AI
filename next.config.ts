@@ -4,7 +4,7 @@ const isGithubPages = process.env.GITHUB_PAGES === "true"
 
 const nextConfig: NextConfig = {
   output: "export",
-  basePath: isGithubPages ? "/PortfolioForge-AI" : "",
+  basePath: isGithubPages ? "/Hackforge-AI" : "",
   trailingSlash: true,
   reactStrictMode: true,
   images: {

@@ -45,7 +45,7 @@ const FEATURES = [
 const FAQ = [
   {
     question: "Do I need to know coding to use this?",
-    answer: "Not at all! PortfolioForge AI handles all the code generation. You just answer questions, pick a theme, and customize visually.",
+    answer: "Not at all! HackForge AI handles all the code generation. You just answer questions, pick a theme, and customize visually.",
   },
   {
     question: "Can I use my own GitHub projects?",
@@ -81,7 +81,7 @@ export default function LandingPage() {
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-xl">PortfolioForge AI</span>
+              <span className="font-bold text-xl">HackForge AI</span>
             </div>
             <div className="hidden md:flex items-center gap-6">
               <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -390,7 +390,7 @@ export default function LandingPage() {
             >
               <h2 className="text-3xl sm:text-4xl font-bold">Ready to Build Your Portfolio?</h2>
               <p className="text-muted-foreground text-lg mt-4">
-                Join thousands of developers who&apos;ve created their professional portfolio with PortfolioForge AI.
+                Join thousands of developers who&apos;ve created their professional portfolio with HackForge AI.
               </p>
               <Link href="/onboarding">
                 <Button size="xl" variant="premium" className="gap-2 mt-4">
@@ -413,7 +413,7 @@ export default function LandingPage() {
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                   <Sparkles className="h-5 w-5 text-white" />
                 </div>
-                <span className="font-bold text-xl">PortfolioForge AI</span>
+                <span className="font-bold text-xl">HackForge AI</span>
               </div>
               <p className="text-sm text-muted-foreground">Build professional portfolios with AI. No coding required.</p>
             </div>
@@ -442,7 +442,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-border/50 mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>© 2024 PortfolioForge AI. Built with Next.js, React, and TypeScript.</p>
+            <p>© 2024 HackForge AI. Built with Next.js, React, and TypeScript.</p>
           </div>
         </div>
       </footer>
