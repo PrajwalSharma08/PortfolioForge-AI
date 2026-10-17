@@ -42,6 +42,7 @@ describe("portfolio-forge utilities & data generation", () => {
         startDate: "2020",
         endDate: "2024",
         grade: "8.9 CGPA",
+        description: "Specialized in Artificial Intelligence and Machine Learning",
       },
     ]
 
@@ -51,6 +52,7 @@ describe("portfolio-forge utilities & data generation", () => {
         name: "AWS Certified Solutions Architect",
         issuingOrganization: "Amazon Web Services",
         date: "2024",
+        credentialUrl: "https://aws.amazon.com",
       },
     ]
 
@@ -59,7 +61,14 @@ describe("portfolio-forge utilities & data generation", () => {
         id: "proj-1",
         name: "AI Portfolio Forge",
         shortDescription: "An automated developer portfolio creator",
+        detailedDescription: "Next-generation automated portfolio generator using React and Next.js",
         technologies: ["Next.js", "TypeScript", "Tailwind CSS"],
+        githubUrl: "https://github.com/PrajwalSharma08/PortfolioForge-AI",
+        liveDemoUrl: "https://prajwalsharma08.github.io/PortfolioForge-AI",
+        image: "",
+        role: "Lead Engineer",
+        featured: true,
+        source: "manual",
       },
     ]
 
@@ -101,6 +110,10 @@ describe("portfolio-forge utilities & data generation", () => {
           institution: "Demo University",
           degree: "Bachelor of Engineering",
           fieldOfStudy: "Information Technology",
+          startDate: "2021",
+          endDate: "2025",
+          grade: "9.0 CGPA",
+          description: "Top 5% of class",
         },
       ],
       certifications: [
@@ -108,6 +121,8 @@ describe("portfolio-forge utilities & data generation", () => {
           id: "cert-test",
           name: "Full Stack Certification",
           issuingOrganization: "Meta",
+          date: "2024",
+          credentialUrl: "https://meta.com/cert",
         },
       ],
       projects: [
@@ -115,6 +130,14 @@ describe("portfolio-forge utilities & data generation", () => {
           id: "proj-test",
           name: "Sentinel Shield",
           shortDescription: "Security Analysis Tool",
+          detailedDescription: "Real-time threat monitoring and protection suite",
+          technologies: ["Python", "React", "Docker"],
+          githubUrl: "https://github.com/PrajwalSharma08/SentinelShield",
+          liveDemoUrl: "",
+          image: "",
+          role: "Creator",
+          featured: true,
+          source: "manual" as const,
         },
       ],
     }
@@ -124,13 +147,14 @@ describe("portfolio-forge utilities & data generation", () => {
 
     // Apply questionnaire data
     portfolio.profile.fullName = rawQuestionnaireData.fullName
-    portfolio.profile.title = rawQuestionnaireData.professionalTitle
-    portfolio.profile.bio = rawQuestionnaireData.shortBio
+    portfolio.profile.professionalTitle = rawQuestionnaireData.professionalTitle
+    portfolio.profile.shortBio = rawQuestionnaireData.shortBio
     portfolio.education = rawQuestionnaireData.education
     portfolio.certifications = rawQuestionnaireData.certifications
     portfolio.projects = rawQuestionnaireData.projects
 
     expect(portfolio.profile.fullName).toBe("Prajwal Sharma")
+    expect(portfolio.profile.professionalTitle).toBe("Full Stack AI Engineer")
     expect(portfolio.education.length).toBe(1)
     expect(portfolio.education[0].institution).toBe("Demo University")
     expect(portfolio.certifications.length).toBe(1)
