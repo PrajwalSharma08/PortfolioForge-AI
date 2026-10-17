@@ -1,0 +1,368 @@
+"use client"
+
+import * as React from "react"
+import { X, Download, Code, Loader2, Sparkles } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { PortfolioData } from "@/types/portfolio"
+import JSZip from "jszip"
+import { saveAs } from "file-saver"
+
+import { SectionRenderer } from "@/components/portfolio/section-renderer"
+
+const emptySubscribe = () => () => {}
+const useIsMounted = () => React.useSyncExternalStore(emptySubscribe, () => true, () => false)
+
+export default function PreviewPage() {
+  const isMounted = useIsMounted()
+  const [portfolio, setPortfolio] = React.useState<PortfolioData | null>(null)
+  const [downloading, setDownloading] = React.useState(false)
+
+  React.useEffect(() => {
+    const frameId = requestAnimationFrame(() => {
+      if (typeof window !== "undefined") {
+        const saved = localStorage.getItem("portfolio-data")
+        if (saved) {
+          try {
+            setPortfolio(JSON.parse(saved) as PortfolioData)
+          } catch {
+            // ignore
+          }
+        }
+      }
+    })
+    return () => cancelAnimationFrame(frameId)
+  }, [])
+
+  const handleDownload = async () => {
+    if (!portfolio) return
+    setDownloading(true)
+    try {
+      await generateAndDownloadPortfolio(portfolio)
+    } catch (error) {
+      console.error("Download failed:", error)
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm font-medium text-muted-foreground">Loading Portfolio Preview...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!portfolio) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold">No Portfolio Data</h2>
+          <p className="text-muted-foreground">Please complete the onboarding flow first.</p>
+          <Button onClick={() => window.location.href = "/onboarding"}>
+            Go to Onboarding
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  const sortedSections = [...portfolio.sections].filter((s) => s.enabled).sort((a, b) => a.order - b.order)
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4">
+          <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.history.back()}>
+                <X className="h-4 w-4" />
+              </Button>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shrink-0">
+                <Sparkles className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-bold text-sm sm:text-lg">PortfolioForge</span>
+              <Badge variant="secondary" className="text-[10px] sm:text-xs hidden xs:inline-flex">Preview</Badge>
+            </div>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Button variant="outline" size="sm" onClick={handleDownload} disabled={downloading} className="gap-1.5 h-8 text-xs px-2.5 sm:px-3">
+                <Download className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{downloading ? "Preparing..." : "Download Portfolio"}</span>
+                <span className="sm:hidden">Export</span>
+              </Button>
+              <Button variant="default" size="sm" onClick={() => window.location.href = "/editor"} className="gap-1.5 h-8 text-xs px-2.5 sm:px-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:opacity-90">
+                <Code className="h-3.5 w-3.5" />
+                Edit
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="min-h-[calc(100vh-64px)]" style={{ background: portfolio.theme.tokens.colors.background, color: portfolio.theme.tokens.colors.text }}>
+        <div style={{ fontFamily: portfolio.theme.tokens.typography.fontFamily.sans }}>
+          {sortedSections.map((section) => (
+            <SectionRenderer key={section.id} section={section} portfolio={portfolio} />
+          ))}
+        </div>
+      </main>
+
+      <footer className="border-t border-border/50 py-8" style={{ borderColor: portfolio.theme.tokens.colors.border }}>
+        <div className="max-w-7xl mx-auto px-4 text-center" style={{ color: portfolio.theme.tokens.colors.textMuted }}>
+          <p>Preview generated by PortfolioForge AI</p>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+async function generateAndDownloadPortfolio(portfolio: PortfolioData) {
+  const zip = new JSZip()
+
+  const packageJson = {
+    name: `portfolio-${portfolio.profile.fullName.toLowerCase().replace(/\s+/g, "-")}`,
+    version: "1.0.0",
+    private: true,
+    scripts: {
+      dev: "next dev",
+      build: "next build",
+      start: "next start",
+      lint: "next lint",
+    },
+    dependencies: {
+      next: "14.2.0",
+      react: "18.3.0",
+      "react-dom": "18.3.0",
+      "lucide-react": "0.400.0",
+      "framer-motion": "11.0.0",
+    },
+    devDependencies: {
+      "@types/node": "20.12.0",
+      "@types/react": "18.3.0",
+      "@types/react-dom": "18.3.0",
+      typescript: "5.4.0",
+      tailwindcss: "3.4.0",
+      postcss: "8.4.38",
+      autoprefixer: "10.4.19",
+      eslint: "8.57.0",
+      "eslint-config-next": "14.2.0",
+    },
+  }
+
+  const tsconfig = {
+    compilerOptions: {
+      lib: ["dom", "dom.iterable", "esnext"],
+      allowJs: true,
+      skipLibCheck: true,
+      strict: true,
+      noEmit: true,
+      esModuleInterop: true,
+      module: "esnext",
+      moduleResolution: "bundler",
+      resolveJsonModule: true,
+      isolatedModules: true,
+      jsx: "preserve",
+      incremental: true,
+      plugins: [{ name: "next" }],
+      paths: { "@/*": ["./*"] },
+    },
+    include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+    exclude: ["node_modules"],
+  }
+
+  const tailwindConfig = `/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: '${portfolio.theme.tokens.colors.primary}',
+        secondary: '${portfolio.theme.tokens.colors.secondary}',
+        accent: '${portfolio.theme.tokens.colors.accent}',
+        background: '${portfolio.theme.tokens.colors.background}',
+        surface: '${portfolio.theme.tokens.colors.surface}',
+        text: '${portfolio.theme.tokens.colors.text}',
+        textMuted: '${portfolio.theme.tokens.colors.textMuted}',
+        border: '${portfolio.theme.tokens.colors.border}',
+      },
+      fontFamily: {
+        sans: ['${portfolio.theme.tokens.typography.fontFamily.sans.replace(/'/g, "")}'],
+        mono: ['${portfolio.theme.tokens.typography.fontFamily.mono.replace(/'/g, "")}'],
+        display: ['${portfolio.theme.tokens.typography.fontFamily.display.replace(/'/g, "")}'],
+      },
+      borderRadius: {
+        lg: '${portfolio.theme.tokens.borderRadius.lg}',
+        xl: '${portfolio.theme.tokens.borderRadius.xl}',
+        '2xl': '${portfolio.theme.tokens.borderRadius["2xl"]}',
+      },
+    },
+  },
+  plugins: [],
+}`
+
+  const globalsCss = `@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: ${portfolio.theme.tokens.colors.background};
+  --foreground: ${portfolio.theme.tokens.colors.text};
+  --primary: ${portfolio.theme.tokens.colors.primary};
+  --secondary: ${portfolio.theme.tokens.colors.secondary};
+  --accent: ${portfolio.theme.tokens.colors.accent};
+  --surface: ${portfolio.theme.tokens.colors.surface};
+  --text-muted: ${portfolio.theme.tokens.colors.textMuted};
+  --border: ${portfolio.theme.tokens.colors.border};
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: ${portfolio.theme.tokens.typography.fontFamily.sans};
+  background: var(--background);
+  color: var(--foreground);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}`
+
+  const layoutTsx = `import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import "./globals.css"
+
+const inter = Inter({ subsets: ["latin"] })
+
+export const metadata: Metadata = {
+  title: "${portfolio.seo.title}",
+  description: "${portfolio.seo.description}",
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className={\`\${inter.className} antialiased\`}>
+      <body className="min-h-screen bg-background text-foreground">{children}</body>
+    </html>
+  )
+}`
+
+  const pageTsx = generatePortfolioPage()
+
+  const portfolioDataTs = `export const portfolioData = ${JSON.stringify(portfolio, null, 2)}`
+
+  const readme = `# ${portfolio.profile.fullName}'s Portfolio
+
+Generated with PortfolioForge AI
+
+## Getting Started
+
+\`\`\`bash
+npm install
+npm run dev
+\`\`\`
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Deployment
+
+### Vercel (Recommended)
+1. Push this repository to GitHub
+2. Import the repository in Vercel
+3. Deploy with default settings
+
+### Netlify
+1. Push this repository to GitHub
+2. Import the repository in Netlify
+3. Build command: \`npm run build\`
+4. Output directory: \`.next\`
+
+### Docker
+\`\`\`bash
+docker build -t portfolio .
+docker run -p 3000:3000 portfolio
+\`\`\`
+
+## Customization
+
+Edit \`src/lib/portfolio-data.ts\` to modify your portfolio content.
+
+Edit \`tailwind.config.js\` to customize the theme colors, fonts, and spacing.
+
+## Theme
+
+This portfolio uses the **${portfolio.theme.name}** theme.
+
+## License
+
+MIT License - feel free to use this for your personal portfolio.
+`
+
+  zip.file("package.json", JSON.stringify(packageJson, null, 2))
+  zip.file("tsconfig.json", JSON.stringify(tsconfig, null, 2))
+  zip.file("tailwind.config.js", tailwindConfig)
+  zip.file("postcss.config.js", "module.exports = { plugins: { tailwindcss: {}, autoprefixer: {} } }")
+  zip.file("next.config.js", "/** @type {import('next').NextConfig} */\nconst nextConfig = {}\nmodule.exports = nextConfig")
+  zip.file(".gitignore", "# dependencies\nnode_modules\n.next\nout\nbuild\n\n# misc\n.DS_Store\n*.pem\n\n# debug\nnpm-debug.log*\nyarn-debug.log*\nyarn-error.log*\n\n# local env files\n.env*.local\n\n# vercel\n.vercel\n\n# typescript\n*.tsbuildinfo\nnext-env.d.ts")
+  zip.file("README.md", readme)
+
+  const srcFolder = zip.folder("src")
+  srcFolder?.file("globals.css", globalsCss)
+  
+  const appFolder = srcFolder?.folder("app")
+  appFolder?.file("layout.tsx", layoutTsx)
+  appFolder?.file("page.tsx", pageTsx)
+  appFolder?.file("globals.css", globalsCss)
+  
+  const libFolder = srcFolder?.folder("lib")
+  libFolder?.file("portfolio-data.ts", portfolioDataTs)
+  
+  const componentsFolder = srcFolder?.folder("components")
+  componentsFolder?.file("portfolio-sections.tsx", generatePortfolioSections(portfolio))
+
+  const content = await zip.generateAsync({ type: "blob" })
+  saveAs(content, `${portfolio.profile.fullName.toLowerCase().replace(/\s+/g, "-")}-portfolio.zip`)
+}
+
+function generatePortfolioPage(): string {
+  return `import { PortfolioRenderer } from "@/components/portfolio-sections"
+import { portfolioData } from "@/lib/portfolio-data"
+
+export default function Page() {
+  return <PortfolioRenderer portfolio={portfolioData} />
+}`
+}
+
+function generatePortfolioSections(portfolio: PortfolioData): string {
+  return `import { PortfolioData } from "@/types/portfolio"
+import { SectionRenderer } from "./section-renderer"
+
+export function PortfolioRenderer({ portfolio }: { portfolio: PortfolioData }) {
+  const sortedSections = [...portfolio.sections]
+    .filter((s) => s.enabled)
+    .sort((a, b) => a.order - b.order)
+
+  return (
+    <div className="min-h-screen" style={{ fontFamily: portfolio.theme.tokens.typography.fontFamily.sans }}>
+      {sortedSections.map((section) => (
+        <SectionRenderer key={section.id} section={section} portfolio={portfolio} />
+      ))}
+    </div>
+  )
+}`
+}
