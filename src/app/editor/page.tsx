@@ -132,7 +132,7 @@ export default function EditorPage() {
       zip.file("portfolio-data.json", dataStr)
       zip.file(
         "README.md",
-        `# ${portfolio.profile.fullName}'s Portfolio\n\nGenerated with HackForge AI.\n\nTheme: ${portfolio.theme.name}\nTitle: ${portfolio.profile.professionalTitle}`
+        `# ${portfolio.profile.fullName}'s Portfolio\n\nGenerated with PortfolioForge AI.\n\nTheme: ${portfolio.theme.name}\nTitle: ${portfolio.profile.professionalTitle}`
       )
       const content = await zip.generateAsync({ type: "blob" })
       saveAs(content, `portfolio-${portfolio.profile.fullName.toLowerCase().replace(/\s+/g, "-")}.zip`)
@@ -183,7 +183,7 @@ export default function EditorPage() {
                 <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-sm sm:text-base md:text-lg">HackForge</span>
+                <span className="font-bold text-sm sm:text-base md:text-lg">PortfolioForge</span>
                 <Badge variant="secondary" className="text-[10px] sm:text-xs hidden xs:inline-flex">Editor</Badge>
               </div>
             </div>

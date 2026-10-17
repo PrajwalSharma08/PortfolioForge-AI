@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ HackForge AI
+# ⚡ PortfolioForge AI
 
 ### *Craft Dribbble-Grade Developer Portfolios in Minutes with AI*
 
@@ -9,7 +9,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 [![Vitest](https://img.shields.io/badge/Vitest-Passing-6E9F18?style=for-the-badge&logo=vitest)](https://vitest.dev/)
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen?style=for-the-badge&logo=github)](https://prajwalsharma08.github.io/Hackforge-AI/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen?style=for-the-badge&logo=github)](https://prajwalsharma08.github.io/PortfolioForge-AI/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 <p align="center">
@@ -17,11 +17,11 @@
 </p>
 
 <p align="center">
-  <a href="https://prajwalsharma08.github.io/Hackforge-AI/">
+  <a href="https://prajwalsharma08.github.io/PortfolioForge-AI/">
     <b>🌐 Live Demo on GitHub Pages</b>
   </a>
   &nbsp;•&nbsp;
-  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FPrajwalSharma08%2FHackforge-AI">
+  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FPrajwalSharma08%2FPortfolioForge-AI">
     <b>▲ Deploy to Vercel</b>
   </a>
 </p>
@@ -32,9 +32,9 @@
 
 ---
 
-## 🌟 Why HackForge AI?
+## 🌟 Why PortfolioForge AI?
 
-Traditional portfolio builders produce bland, cookie-cutter websites with dull templates. **HackForge AI** combines **Dribbble-level aesthetics**, **smart onboarding tailoring (B.Tech College Students vs. Seasoned Pros)**, **GitHub profile & README data extraction**, and **live visual design editing** to deliver a portfolio that actually gets you hired.
+Traditional portfolio builders produce bland, cookie-cutter websites with dull templates. **PortfolioForge AI** combines **Dribbble-level aesthetics**, **smart onboarding tailoring (B.Tech College Students vs. Seasoned Pros)**, **GitHub profile & README data extraction**, and **live visual design editing** to deliver a portfolio that actually gets you hired.
 
 ```
        ┌────────────────┐
@@ -119,7 +119,7 @@ Traditional portfolio builders produce bland, cookie-cutter websites with dull t
 ## 📂 Project Structure
 
 ```
-hackforge-ai/
+portfolioforge-ai/
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml             # GitHub Actions CI (Lint, Typecheck, Test, Build)
@@ -161,8 +161,8 @@ npm -v
 
 ### 2. Clone the Repository
 ```bash
-git clone https://github.com/PrajwalSharma08/Hackforge-AI.git
-cd Hackforge-AI
+git clone https://github.com/PrajwalSharma08/PortfolioForge-AI.git
+cd PortfolioForge-AI
 ```
 
 ### 3. Install Dependencies
@@ -208,8 +208,8 @@ npm run build
 
 **Prajwal Sharma**
 - GitHub: [@PrajwalSharma08](https://github.com/PrajwalSharma08)
-- Project: [Hackforge-AI](https://github.com/PrajwalSharma08/Hackforge-AI)
-- Live Website: [https://prajwalsharma08.github.io/Hackforge-AI/](https://prajwalsharma08.github.io/Hackforge-AI/)
+- Project: [PortfolioForge-AI](https://github.com/PrajwalSharma08/PortfolioForge-AI)
+- Live Website: [https://prajwalsharma08.github.io/PortfolioForge-AI/](https://prajwalsharma08.github.io/PortfolioForge-AI/)
 
 ---
 

@@ -308,7 +308,7 @@ export default function OnboardingPage() {
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-xl">HackForge AI</span>
+              <span className="font-bold text-xl">PortfolioForge AI</span>
             </div>
             <div className="hidden md:flex items-center gap-4">
               {steps.map((step, index) => (

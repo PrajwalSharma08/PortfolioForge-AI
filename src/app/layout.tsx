@@ -15,24 +15,24 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "HackForge AI - Build Your Portfolio With AI",
+  title: "PortfolioForge AI - Build Your Portfolio With AI",
   description: "Answer a few questions, connect your GitHub, choose your style, and generate a professional portfolio in minutes.",
-  keywords: ["portfolio", "AI", "developer", "GitHub", "Next.js", "React", "portfolio builder", "HackForge"],
-  authors: [{ name: "HackForge AI" }],
-  creator: "HackForge AI",
-  publisher: "HackForge AI",
+  keywords: ["portfolio", "AI", "developer", "GitHub", "Next.js", "React", "portfolio builder", "PortfolioForge"],
+  authors: [{ name: "PortfolioForge AI" }],
+  creator: "PortfolioForge AI",
+  publisher: "PortfolioForge AI",
   robots: "index, follow",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://prajwalsharma08.github.io/Hackforge-AI/",
-    title: "HackForge AI - Build Your Portfolio With AI",
+    url: "https://prajwalsharma08.github.io/PortfolioForge-AI/",
+    title: "PortfolioForge AI - Build Your Portfolio With AI",
     description: "Answer a few questions, connect your GitHub, choose your style, and generate a professional portfolio in minutes.",
-    siteName: "HackForge AI",
+    siteName: "PortfolioForge AI",
   },
   twitter: {
     card: "summary_large_image",
-    title: "HackForge AI - Build Your Portfolio With AI",
+    title: "PortfolioForge AI - Build Your Portfolio With AI",
     description: "Answer a few questions, connect your GitHub, choose your style, and generate a professional portfolio in minutes.",
   },
   verification: {
