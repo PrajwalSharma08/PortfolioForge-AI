@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { FileUpload } from "@/components/ui/file-upload"
-import { cn } from "@/lib/utils"
+import { cn, getAppPath } from "@/lib/utils"
 import { 
   PortfolioData, SectionConfig, SectionType, 
   Project, Skill, Education, Experience, Certification, SocialLink,
@@ -87,8 +87,39 @@ export default function EditorPage() {
     }, 400)
   }
 
+  // Auto-save changes to localStorage so preview and client pages stay perfectly in sync
+  React.useEffect(() => {
+    if (!portfolio) return
+    const timer = setTimeout(() => {
+      localStorage.setItem("portfolio-data", JSON.stringify(portfolio))
+    }, 350)
+    return () => clearTimeout(timer)
+  }, [portfolio])
+
   const updatePortfolio = (updates: Partial<PortfolioData>) => {
-    setPortfolio((prev) => (prev ? { ...prev, ...updates, updatedAt: new Date().toISOString() } : null))
+    setPortfolio((prev) => {
+      if (!prev) return null
+      const updated = { ...prev, ...updates, updatedAt: new Date().toISOString() }
+
+      // Auto-enable section when items are present
+      if (updates.education && updates.education.length > 0) {
+        updated.sections = updated.sections.map((s) => (s.type === "education" ? { ...s, enabled: true } : s))
+      }
+      if (updates.projects && updates.projects.length > 0) {
+        updated.sections = updated.sections.map((s) => (s.type === "projects" ? { ...s, enabled: true } : s))
+      }
+      if (updates.certifications && updates.certifications.length > 0) {
+        updated.sections = updated.sections.map((s) => (s.type === "certifications" ? { ...s, enabled: true } : s))
+      }
+      if (updates.experience && updates.experience.length > 0) {
+        updated.sections = updated.sections.map((s) => (s.type === "experience" ? { ...s, enabled: true } : s))
+      }
+      if (updates.skills && updates.skills.length > 0) {
+        updated.sections = updated.sections.map((s) => (s.type === "skills" ? { ...s, enabled: true } : s))
+      }
+
+      return updated
+    })
   }
 
   const updateSection = (sectionId: string, updates: Partial<SectionConfig>) => {
@@ -162,7 +193,7 @@ export default function EditorPage() {
           <p className="text-muted-foreground text-sm">
             Please complete the onboarding flow to set up your profile, projects, and theme.
           </p>
-          <Button onClick={() => (window.location.href = "/onboarding")}>
+          <Button onClick={() => (window.location.href = getAppPath("/onboarding"))}>
             Go to Onboarding Flow
           </Button>
         </div>
@@ -176,7 +207,7 @@ export default function EditorPage() {
         <div className="max-w-full mx-auto px-3 sm:px-4">
           <div className="flex items-center justify-between h-14 gap-2 sm:gap-4">
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => (window.location.href = "/onboarding")}>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => (window.location.href = getAppPath("/onboarding"))}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-sm shrink-0">
@@ -1649,7 +1680,16 @@ function SectionsEditor({
    ========================================================================= */
 
 function PortfolioPreview({ portfolio }: { portfolio: PortfolioData }) {
-  const sortedSections = [...portfolio.sections].filter((s) => s.enabled).sort((a, b) => a.order - b.order)
+  const sortedSections = [...(portfolio.sections || [])]
+    .map((s) => {
+      if (s.type === "certifications" && portfolio.certifications?.length) return { ...s, enabled: true }
+      if (s.type === "education" && portfolio.education?.length) return { ...s, enabled: true }
+      if (s.type === "projects" && portfolio.projects?.length) return { ...s, enabled: true }
+      if (s.type === "experience" && portfolio.experience?.length) return { ...s, enabled: true }
+      return s
+    })
+    .filter((s) => s.enabled)
+    .sort((a, b) => a.order - b.order)
 
   return (
     <div className="min-h-screen" style={{ fontFamily: portfolio.theme.tokens.typography.fontFamily.sans }}>

@@ -18,7 +18,7 @@ interface ExperienceBuilderProps {
 }
 
 export function ExperienceBuilder({ value, onChange, disabled }: ExperienceBuilderProps) {
-  const [editingId, setEditingId] = React.useState<string | null>(null)
+  const [editingId, setEditingId] = React.useState<string | null>(value.length === 0 ? "new" : null)
   const [formData, setFormData] = React.useState<Partial<Experience>>({
     company: "",
     jobTitle: "",
@@ -32,6 +32,8 @@ export function ExperienceBuilder({ value, onChange, disabled }: ExperienceBuild
   })
   const [achievementInput, setAchievementInput] = React.useState("")
   const [techInput, setTechInput] = React.useState("")
+
+  const draftIdRef = React.useRef("exp-draft-item")
 
   const resetForm = () => {
     setFormData({
@@ -49,45 +51,69 @@ export function ExperienceBuilder({ value, onChange, disabled }: ExperienceBuild
     setTechInput("")
   }
 
+  const handleFieldChange = (updates: Partial<Experience>) => {
+    const updatedForm = { ...formData, ...updates }
+    setFormData(updatedForm)
+
+    if (editingId === "new" && (updatedForm.company?.trim() || updatedForm.jobTitle?.trim())) {
+      const draftExp: Experience = {
+        id: draftIdRef.current,
+        company: updatedForm.company?.trim() || "",
+        jobTitle: updatedForm.jobTitle?.trim() || "",
+        location: updatedForm.location || "",
+        startDate: updatedForm.startDate || "",
+        endDate: updatedForm.currentlyWorking ? "" : (updatedForm.endDate || ""),
+        currentlyWorking: updatedForm.currentlyWorking || false,
+        description: updatedForm.description || "",
+        achievements: updatedForm.achievements || [],
+        technologies: updatedForm.technologies || [],
+      }
+      const existingIdx = value.findIndex((e) => e.id === draftIdRef.current)
+      if (existingIdx >= 0) {
+        const next = [...value]
+        next[existingIdx] = draftExp
+        onChange(next)
+      } else {
+        onChange([...value, draftExp])
+      }
+    } else if (editingId && editingId !== "new") {
+      onChange(
+        value.map((exp) => (exp.id === editingId ? { ...exp, ...updates } : exp))
+      )
+    }
+  }
+
   const handleAddAchievement = () => {
     if (achievementInput.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        achievements: [...(prev.achievements || []), achievementInput.trim()],
-      }))
+      const updatedAchievements = [...(formData.achievements || []), achievementInput.trim()]
+      handleFieldChange({ achievements: updatedAchievements })
       setAchievementInput("")
     }
   }
 
   const handleRemoveAchievement = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      achievements: prev.achievements?.filter((_, i) => i !== index) || [],
-    }))
+    const updatedAchievements = formData.achievements?.filter((_, i) => i !== index) || []
+    handleFieldChange({ achievements: updatedAchievements })
   }
 
   const handleAddTech = () => {
     if (techInput.trim() && !formData.technologies?.includes(techInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        technologies: [...(prev.technologies || []), techInput.trim()],
-      }))
+      const updatedTechs = [...(formData.technologies || []), techInput.trim()]
+      handleFieldChange({ technologies: updatedTechs })
       setTechInput("")
     }
   }
 
   const handleRemoveTech = (tech: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      technologies: prev.technologies?.filter((t) => t !== tech) || [],
-    }))
+    const updatedTechs = formData.technologies?.filter((t) => t !== tech) || []
+    handleFieldChange({ technologies: updatedTechs })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.company || !formData.jobTitle) return
+    if (!formData.company?.trim() && !formData.jobTitle?.trim()) return
 
-    if (editingId) {
+    if (editingId && editingId !== "new") {
       onChange(
         value.map((exp) =>
           exp.id === editingId ? { ...exp, ...formData, id: editingId } : exp
@@ -96,8 +122,8 @@ export function ExperienceBuilder({ value, onChange, disabled }: ExperienceBuild
     } else {
       const newExperience: Experience = {
         id: `exp-${Date.now()}`,
-        company: formData.company!,
-        jobTitle: formData.jobTitle!,
+        company: formData.company?.trim() || "Company",
+        jobTitle: formData.jobTitle?.trim() || "Role",
         location: formData.location || "",
         startDate: formData.startDate || "",
         endDate: formData.currentlyWorking ? "" : (formData.endDate || ""),
@@ -106,7 +132,9 @@ export function ExperienceBuilder({ value, onChange, disabled }: ExperienceBuild
         achievements: formData.achievements || [],
         technologies: formData.technologies || [],
       }
-      onChange([...value, newExperience])
+      const cleanList = value.filter((e) => e.id !== draftIdRef.current)
+      onChange([...cleanList, newExperience])
+      draftIdRef.current = `exp-draft-${Date.now()}`
     }
     setEditingId(null)
     resetForm()
@@ -120,8 +148,8 @@ export function ExperienceBuilder({ value, onChange, disabled }: ExperienceBuild
   }
 
   const handleDelete = (id: string) => {
-    onChange(value.filter((exp) => exp.id !== id))
-    if (editingId === id) {
+    onChange(value.filter((exp) => exp.id !== id && exp.id !== draftIdRef.current))
+    if (editingId === id || editingId === "new") {
       setEditingId(null)
       resetForm()
     }
@@ -162,7 +190,7 @@ export function ExperienceBuilder({ value, onChange, disabled }: ExperienceBuild
                   label="Company"
                   placeholder="Acme Inc."
                   value={formData.company}
-                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                  onChange={(e) => handleFieldChange({ company: e.target.value })}
                   required
                   disabled={disabled}
                 />
@@ -170,7 +198,7 @@ export function ExperienceBuilder({ value, onChange, disabled }: ExperienceBuild
                   label="Job Title"
                   placeholder="Senior Software Engineer"
                   value={formData.jobTitle}
-                  onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
+                  onChange={(e) => handleFieldChange({ jobTitle: e.target.value })}
                   required
                   disabled={disabled}
                 />
@@ -180,14 +208,14 @@ export function ExperienceBuilder({ value, onChange, disabled }: ExperienceBuild
                   label="Location"
                   placeholder="San Francisco, CA"
                   value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  onChange={(e) => handleFieldChange({ location: e.target.value })}
                   disabled={disabled}
                 />
                 <Input
                   type="month"
                   label="Start Date"
                   value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  onChange={(e) => handleFieldChange({ startDate: e.target.value })}
                   disabled={disabled}
                 />
                 <div className="flex items-end gap-2">
@@ -195,14 +223,14 @@ export function ExperienceBuilder({ value, onChange, disabled }: ExperienceBuild
                     type="month"
                     label="End Date"
                     value={formData.currentlyWorking ? "" : formData.endDate}
-                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    onChange={(e) => handleFieldChange({ endDate: e.target.value })}
                     disabled={disabled || formData.currentlyWorking}
                   />
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.currentlyWorking}
-                      onChange={(e) => setFormData({ ...formData, currentlyWorking: e.target.checked })}
+                      onChange={(e) => handleFieldChange({ currentlyWorking: e.target.checked })}
                       disabled={disabled}
                       className="rounded border-input"
                     />
@@ -214,7 +242,7 @@ export function ExperienceBuilder({ value, onChange, disabled }: ExperienceBuild
                 label="Description"
                 placeholder="Describe your role, responsibilities, and impact..."
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) => handleFieldChange({ description: e.target.value })}
                 disabled={disabled}
                 rows={3}
               />

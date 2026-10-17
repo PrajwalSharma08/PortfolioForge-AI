@@ -11,7 +11,7 @@ import { GenerationScreen } from "@/features/ai"
 import { ThemeSelector } from "@/features/themes"
 import { createDemoPortfolioData, DEMO_THEME_CONFIG } from "@/lib/demo-data"
 import { PortfolioData, ThemeConfig, GitHubProfile, GitHubRepository } from "@/types/portfolio"
-import { cn } from "@/lib/utils"
+import { cn, getAppPath } from "@/lib/utils"
 
 import { ExtractedReadmeData } from "@/features/github/github-import"
 
@@ -136,12 +136,9 @@ export default function OnboardingPage() {
       }
     }
 
-    // Experience: if skipped or student without exp, disable section & set empty array
+    // Experience: if skipped or student without exp, set empty array
     if (q.hasExperience === "no" || !Array.isArray(q.experience) || q.experience.length === 0) {
       portfolioData.experience = []
-      portfolioData.sections = portfolioData.sections.map((s) =>
-        s.type === "experience" ? { ...s, enabled: false } : s
-      )
     } else {
       portfolioData.experience = q.experience as PortfolioData["experience"]
     }
@@ -151,15 +148,29 @@ export default function OnboardingPage() {
       portfolioData.education = q.education as PortfolioData["education"]
     }
 
-    // Certifications: if empty, disable section & set empty array
+    // Certifications
     if (Array.isArray(q.certifications) && q.certifications.length > 0) {
       portfolioData.certifications = q.certifications as PortfolioData["certifications"]
     } else {
       portfolioData.certifications = []
-      portfolioData.sections = portfolioData.sections.map((s) =>
-        s.type === "certifications" ? { ...s, enabled: false } : s
-      )
     }
+
+    // Ensure sections are correctly enabled/disabled based on actual content
+    portfolioData.sections = portfolioData.sections.map((s) => {
+      if (s.type === "certifications") {
+        return { ...s, enabled: portfolioData.certifications.length > 0 }
+      }
+      if (s.type === "experience") {
+        return { ...s, enabled: portfolioData.experience.length > 0 }
+      }
+      if (s.type === "education") {
+        return { ...s, enabled: portfolioData.education.length > 0 }
+      }
+      if (s.type === "projects") {
+        return { ...s, enabled: portfolioData.projects.length > 0 }
+      }
+      return s
+    })
 
     // Social links
     let socialList: PortfolioData["socialLinks"] = []
@@ -285,7 +296,7 @@ export default function OnboardingPage() {
                 onClick={() => {
                   if (finalPortfolio) {
                     localStorage.setItem("portfolio-data", JSON.stringify(finalPortfolio))
-                    window.location.href = "/editor"
+                    window.location.href = getAppPath("/editor")
                   }
                 }}
                 className="gap-2"

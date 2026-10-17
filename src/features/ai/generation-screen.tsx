@@ -32,14 +32,44 @@ export function GenerationScreen({ onComplete, initialData }: GenerationScreenPr
   const currentStep = STEPS[currentStepIndex]
   const subSteps = SUB_STEPS[currentStep.id as keyof typeof SUB_STEPS] || []
 
-  const hasRunRef = React.useRef(false)
+  const onCompleteRef = React.useRef(onComplete)
+  const initialDataRef = React.useRef(initialData)
 
   React.useEffect(() => {
-    if (hasRunRef.current) return
-    hasRunRef.current = true
+    onCompleteRef.current = onComplete
+    initialDataRef.current = initialData
+  }, [onComplete, initialData])
+
+  const handleFinish = React.useCallback(() => {
+    const data = initialDataRef.current || {}
+    const fullName = (data?.fullName as string) || "Alex Morgan"
+    const professionalTitle = (data?.professionalTitle as string) || "Full Stack Developer"
+    const shortBio = (data?.shortBio as string) || ""
+
+    const mockData = {
+      ...data,
+      headline: `${professionalTitle} | Building Scalable Web Applications & Modern Digital Experiences`,
+      about:
+        shortBio.trim() ||
+        `I'm ${fullName}, a passionate ${professionalTitle} focused on building scalable, user-centric applications. I specialize in modern web architectures, clean code, and performance optimization.`,
+      seo: {
+        title: `${fullName} | ${professionalTitle}`,
+        description: `${professionalTitle} portfolio of ${fullName}. Building scalable web applications and modern developer tools.`,
+        ogImage: "",
+        keywords: [professionalTitle, fullName, "Portfolio", "Software Engineer"],
+      },
+    }
+
+    setGeneratedData(mockData)
+    onCompleteRef.current(mockData)
+  }, [])
+
+  React.useEffect(() => {
+    let cancelled = false
 
     const runGeneration = async () => {
       for (let i = 0; i < STEPS.length; i++) {
+        if (cancelled) return
         setCurrentStepIndex(i)
         setCompletedSteps((prev) => new Set([...prev, STEPS[i - 1]?.id].filter(Boolean)))
         setSubStepIndex(0)
@@ -47,39 +77,26 @@ export function GenerationScreen({ onComplete, initialData }: GenerationScreenPr
         const currentSubSteps = SUB_STEPS[STEPS[i].id as keyof typeof SUB_STEPS] || []
         if (i < STEPS.length - 1) {
           for (let j = 0; j < currentSubSteps.length; j++) {
+            if (cancelled) return
             setSubStepIndex(j)
-            await new Promise((resolve) => setTimeout(resolve, 250))
+            await new Promise((resolve) => setTimeout(resolve, 140))
           }
         } else {
-          await new Promise((resolve) => setTimeout(resolve, 400))
+          if (cancelled) return
+          await new Promise((resolve) => setTimeout(resolve, 250))
         }
       }
 
-      const fullName = (initialData?.fullName as string) || "Alex Morgan"
-      const professionalTitle = (initialData?.professionalTitle as string) || "Full Stack Developer"
-      const shortBio = (initialData?.shortBio as string) || ""
-
-      const mockData = {
-        ...initialData,
-        headline: `${professionalTitle} | Building Scalable Web Applications & Modern Digital Experiences`,
-        about:
-          shortBio.trim() ||
-          `I'm ${fullName}, a passionate ${professionalTitle} focused on building scalable, user-centric applications. I specialize in modern web architectures, clean code, and performance optimization.`,
-        seo: {
-          title: `${fullName} | ${professionalTitle}`,
-          description: `${professionalTitle} portfolio of ${fullName}. Building scalable web applications and modern developer tools.`,
-          ogImage: "",
-          keywords: [professionalTitle, fullName, "Portfolio", "Software Engineer"],
-        },
-      }
-
-      setGeneratedData(mockData)
-      await new Promise((resolve) => setTimeout(resolve, 300))
-      onComplete(mockData)
+      if (cancelled) return
+      handleFinish()
     }
 
     runGeneration()
-  }, [onComplete, initialData])
+
+    return () => {
+      cancelled = true
+    }
+  }, [handleFinish])
 
   const progress = ((currentStepIndex + 1) / STEPS.length) * 100
 
@@ -111,6 +128,16 @@ export function GenerationScreen({ onComplete, initialData }: GenerationScreenPr
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           />
+        </div>
+        <div className="flex justify-end pt-1">
+          <button
+            type="button"
+            onClick={handleFinish}
+            className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 cursor-pointer"
+          >
+            <span>Skip generation & choose theme directly</span>
+            <span>&rarr;</span>
+          </button>
         </div>
       </div>
 

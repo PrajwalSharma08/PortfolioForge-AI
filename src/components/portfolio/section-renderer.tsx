@@ -331,7 +331,7 @@ export function SectionRenderer({ section, portfolio }: { section: SectionConfig
             {isCyber && <span className="h-0.5 flex-1 bg-gradient-to-r from-[#ff0055] to-transparent" />}
           </div>
           <div className="flex flex-wrap gap-2.5">
-            {portfolio.skills.map((skill) => (
+            {(portfolio.skills || []).map((skill) => (
               <span
                 key={skill.id}
                 className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105"
@@ -365,8 +365,10 @@ export function SectionRenderer({ section, portfolio }: { section: SectionConfig
               isBento ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
             )}
           >
-            {portfolio.projects.map((project, idx) => {
+            {(portfolio.projects || []).map((project, idx) => {
               const isHeroCard = isBento && idx === 0
+              const projectTitle = project.name || (project as unknown as { title?: string }).title || "Untitled Project"
+              const projectTechs = project.technologies || []
               return (
                 <div
                   key={project.id}
@@ -383,7 +385,7 @@ export function SectionRenderer({ section, portfolio }: { section: SectionConfig
                     >
                       <img
                         src={project.image}
-                        alt={project.name}
+                        alt={projectTitle}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       />
                     </div>
@@ -392,7 +394,7 @@ export function SectionRenderer({ section, portfolio }: { section: SectionConfig
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-2">
                         <h3 className="font-bold text-lg md:text-xl" style={{ color: tokens.colors.text }}>
-                          {project.name}
+                          {projectTitle}
                         </h3>
                         {project.featured && (
                           <span
@@ -413,25 +415,27 @@ export function SectionRenderer({ section, portfolio }: { section: SectionConfig
                     </div>
 
                     <div className="space-y-4 pt-2">
-                      <div className="flex flex-wrap gap-1.5">
-                        {project.technologies.slice(0, 6).map((tech) => (
-                          <span
-                            key={tech}
-                            className="px-2.5 py-0.5 rounded text-[11px] font-medium"
-                            style={{
-                              background: isNeo
-                                ? "#ffffff"
-                                : isCyber
-                                ? "rgba(0,240,255,0.08)"
-                                : "rgba(255,255,255,0.06)",
-                              color: isNeo ? "#000000" : isCyber ? "#00f0ff" : tokens.colors.text,
-                              border: isNeo ? "1.5px solid #000" : `1px solid ${tokens.colors.border}`,
-                            }}
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
+                      {projectTechs.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {projectTechs.slice(0, 6).map((tech) => (
+                            <span
+                              key={tech}
+                              className="px-2.5 py-0.5 rounded text-[11px] font-medium"
+                              style={{
+                                background: isNeo
+                                  ? "#ffffff"
+                                  : isCyber
+                                  ? "rgba(0,240,255,0.08)"
+                                  : "rgba(255,255,255,0.06)",
+                                color: isNeo ? "#000000" : isCyber ? "#00f0ff" : tokens.colors.text,
+                                border: isNeo ? "1.5px solid #000" : `1px solid ${tokens.colors.border}`,
+                              }}
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
                       <div
                         className="flex items-center gap-3 pt-3 border-t"
@@ -477,7 +481,7 @@ export function SectionRenderer({ section, portfolio }: { section: SectionConfig
             {isNeo && <span className="text-xl">🎓</span>}
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            {portfolio.education.map((edu) => (
+            {(portfolio.education || []).map((edu) => (
               <div
                 key={edu.id}
                 className="p-5 sm:p-6 space-y-2.5 transition-all"
@@ -528,7 +532,7 @@ export function SectionRenderer({ section, portfolio }: { section: SectionConfig
             {isNeo && <span className="text-xl">💼</span>}
           </div>
           <div className="space-y-4">
-            {portfolio.experience.map((exp) => (
+            {(portfolio.experience || []).map((exp) => (
               <div
                 key={exp.id}
                 className="p-5 sm:p-6 space-y-3 transition-all"
@@ -566,7 +570,7 @@ export function SectionRenderer({ section, portfolio }: { section: SectionConfig
                   {exp.description}
                 </p>
 
-                {exp.achievements.length > 0 && (
+                {(exp.achievements || []).length > 0 && (
                   <ul className="list-disc list-inside space-y-1 text-xs" style={{ color: tokens.colors.textMuted }}>
                     {exp.achievements.map((ach, idx) => (
                       <li key={idx}>{ach}</li>
@@ -574,7 +578,7 @@ export function SectionRenderer({ section, portfolio }: { section: SectionConfig
                   </ul>
                 )}
 
-                {exp.technologies.length > 0 && (
+                {(exp.technologies || []).length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {exp.technologies.map((t) => (
                       <span
@@ -609,7 +613,7 @@ export function SectionRenderer({ section, portfolio }: { section: SectionConfig
             {isNeo && <span className="text-xl">🏆</span>}
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            {portfolio.certifications.map((cert) => (
+            {(portfolio.certifications || []).map((cert) => (
               <div
                 key={cert.id}
                 className="p-5 sm:p-6 space-y-3 flex flex-col justify-between transition-all"

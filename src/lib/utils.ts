@@ -43,3 +43,13 @@ export function getInitials(name: string): string {
     .toUpperCase()
     .slice(0, 2)
 }
+
+export function getAppPath(path: string): string {
+  if (typeof window === "undefined") {
+    return path
+  }
+  const isGhPages = window.location.pathname.startsWith("/PortfolioForge-AI")
+  const prefix = isGhPages ? "/PortfolioForge-AI" : ""
+  const cleanPath = path.startsWith("/") ? path : `/${path}`
+  return `${prefix}${cleanPath}`
+}

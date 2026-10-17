@@ -17,7 +17,7 @@ interface EducationBuilderProps {
 }
 
 export function EducationBuilder({ value, onChange, disabled }: EducationBuilderProps) {
-  const [editingId, setEditingId] = React.useState<string | null>(null)
+  const [editingId, setEditingId] = React.useState<string | null>(value.length === 0 ? "new" : null)
   const [formData, setFormData] = React.useState<Partial<Education>>({
     institution: "",
     degree: "",
@@ -27,6 +27,8 @@ export function EducationBuilder({ value, onChange, disabled }: EducationBuilder
     grade: "",
     description: "",
   })
+
+  const draftIdRef = React.useRef("edu-draft-item")
 
   const resetForm = () => {
     setFormData({
@@ -40,28 +42,60 @@ export function EducationBuilder({ value, onChange, disabled }: EducationBuilder
     })
   }
 
+  const handleFieldChange = (updates: Partial<Education>) => {
+    const updatedForm = { ...formData, ...updates }
+    setFormData(updatedForm)
+
+    if (editingId === "new" && (updatedForm.institution?.trim() || updatedForm.degree?.trim())) {
+      const draftEdu: Education = {
+        id: draftIdRef.current,
+        institution: updatedForm.institution?.trim() || "",
+        degree: updatedForm.degree?.trim() || "",
+        fieldOfStudy: updatedForm.fieldOfStudy || "",
+        startDate: updatedForm.startDate || "",
+        endDate: updatedForm.endDate || "",
+        grade: updatedForm.grade || "",
+        description: updatedForm.description || "",
+      }
+      const existingIdx = value.findIndex((e) => e.id === draftIdRef.current)
+      if (existingIdx >= 0) {
+        const next = [...value]
+        next[existingIdx] = draftEdu
+        onChange(next)
+      } else {
+        onChange([...value, draftEdu])
+      }
+    } else if (editingId && editingId !== "new") {
+      onChange(
+        value.map((edu) => (edu.id === editingId ? { ...edu, ...updates } : edu))
+      )
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.institution || !formData.degree) return
+    if (!formData.institution?.trim() && !formData.degree?.trim()) return
 
-    if (editingId) {
+    if (editingId && editingId !== "new") {
       onChange(
         value.map((edu) =>
           edu.id === editingId ? { ...edu, ...formData, id: editingId } : edu
         )
       )
     } else {
-      const newEducation: Education = {
+      const permEdu: Education = {
         id: `edu-${Date.now()}`,
-        institution: formData.institution!,
-        degree: formData.degree!,
+        institution: formData.institution?.trim() || "State University",
+        degree: formData.degree?.trim() || "Degree",
         fieldOfStudy: formData.fieldOfStudy || "",
         startDate: formData.startDate || "",
         endDate: formData.endDate || "",
         grade: formData.grade || "",
         description: formData.description || "",
       }
-      onChange([...value, newEducation])
+      const cleanList = value.filter((e) => e.id !== draftIdRef.current)
+      onChange([...cleanList, permEdu])
+      draftIdRef.current = `edu-draft-${Date.now()}`
     }
     setEditingId(null)
     resetForm()
@@ -73,8 +107,8 @@ export function EducationBuilder({ value, onChange, disabled }: EducationBuilder
   }
 
   const handleDelete = (id: string) => {
-    onChange(value.filter((edu) => edu.id !== id))
-    if (editingId === id) {
+    onChange(value.filter((edu) => edu.id !== id && edu.id !== draftIdRef.current))
+    if (editingId === id || editingId === "new") {
       setEditingId(null)
       resetForm()
     }
@@ -114,7 +148,7 @@ export function EducationBuilder({ value, onChange, disabled }: EducationBuilder
                 label="College / University / School"
                 placeholder="e.g. Delhi Technological University / State University"
                 value={formData.institution}
-                onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
+                onChange={(e) => handleFieldChange({ institution: e.target.value })}
                 required
                 disabled={disabled}
               />
@@ -123,7 +157,7 @@ export function EducationBuilder({ value, onChange, disabled }: EducationBuilder
                   label="Degree / Course"
                   placeholder="e.g. B.Tech / B.E. / BCA / MCA"
                   value={formData.degree}
-                  onChange={(e) => setFormData({ ...formData, degree: e.target.value })}
+                  onChange={(e) => handleFieldChange({ degree: e.target.value })}
                   required
                   disabled={disabled}
                 />
@@ -131,7 +165,7 @@ export function EducationBuilder({ value, onChange, disabled }: EducationBuilder
                   label="Branch / Field of Study"
                   placeholder="e.g. Computer Science & Engineering"
                   value={formData.fieldOfStudy}
-                  onChange={(e) => setFormData({ ...formData, fieldOfStudy: e.target.value })}
+                  onChange={(e) => handleFieldChange({ fieldOfStudy: e.target.value })}
                   disabled={disabled}
                 />
               </div>
@@ -140,21 +174,21 @@ export function EducationBuilder({ value, onChange, disabled }: EducationBuilder
                   type="month"
                   label="Start Date"
                   value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  onChange={(e) => handleFieldChange({ startDate: e.target.value })}
                   disabled={disabled}
                 />
                 <Input
                   type="month"
                   label="Graduation / End Date"
                   value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  onChange={(e) => handleFieldChange({ endDate: e.target.value })}
                   disabled={disabled}
                 />
                 <Input
                   label="Grade / CGPA / Percentage"
                   placeholder="e.g. 8.6 CGPA / 85%"
                   value={formData.grade}
-                  onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                  onChange={(e) => handleFieldChange({ grade: e.target.value })}
                   disabled={disabled}
                 />
               </div>
@@ -162,7 +196,7 @@ export function EducationBuilder({ value, onChange, disabled }: EducationBuilder
                 label="Coursework / Achievements / Activities (Optional)"
                 placeholder="e.g. Data Structures & Algorithms, Operating Systems, DBMS. Won 1st Prize in College Hackathon, Lead of Web Dev Club."
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) => handleFieldChange({ description: e.target.value })}
                 disabled={disabled}
                 rows={3}
               />

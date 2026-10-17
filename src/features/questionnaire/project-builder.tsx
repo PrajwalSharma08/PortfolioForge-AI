@@ -19,7 +19,7 @@ interface ProjectBuilderProps {
 }
 
 export function ProjectBuilder({ value, onChange, disabled }: ProjectBuilderProps) {
-  const [editingId, setEditingId] = React.useState<string | null>(null)
+  const [editingId, setEditingId] = React.useState<string | null>(value.length === 0 ? "new" : null)
   const [formData, setFormData] = React.useState<Partial<Project>>({
     name: "",
     shortDescription: "",
@@ -32,6 +32,8 @@ export function ProjectBuilder({ value, onChange, disabled }: ProjectBuilderProp
     featured: false,
   })
   const [techInput, setTechInput] = React.useState("")
+
+  const draftIdRef = React.useRef("proj-draft-item")
 
   const resetForm = () => {
     setFormData({
@@ -48,28 +50,57 @@ export function ProjectBuilder({ value, onChange, disabled }: ProjectBuilderProp
     setTechInput("")
   }
 
+  const handleFieldChange = (updates: Partial<Project>) => {
+    const updatedForm = { ...formData, ...updates }
+    setFormData(updatedForm)
+
+    if (editingId === "new" && updatedForm.name?.trim()) {
+      const draftProject: Project = {
+        id: draftIdRef.current,
+        name: updatedForm.name.trim(),
+        shortDescription: updatedForm.shortDescription || "",
+        detailedDescription: updatedForm.detailedDescription || "",
+        technologies: updatedForm.technologies || [],
+        githubUrl: updatedForm.githubUrl || "",
+        liveDemoUrl: updatedForm.liveDemoUrl || "",
+        image: updatedForm.image || "",
+        role: updatedForm.role || "",
+        featured: updatedForm.featured || false,
+        source: "manual",
+      }
+      const existingIdx = value.findIndex((p) => p.id === draftIdRef.current)
+      if (existingIdx >= 0) {
+        const next = [...value]
+        next[existingIdx] = draftProject
+        onChange(next)
+      } else {
+        onChange([...value, draftProject])
+      }
+    } else if (editingId && editingId !== "new") {
+      onChange(
+        value.map((p) => (p.id === editingId ? { ...p, ...updates } : p))
+      )
+    }
+  }
+
   const handleAddTech = () => {
     if (techInput.trim() && !formData.technologies?.includes(techInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        technologies: [...(prev.technologies || []), techInput.trim()],
-      }))
+      const updatedTechs = [...(formData.technologies || []), techInput.trim()]
+      handleFieldChange({ technologies: updatedTechs })
       setTechInput("")
     }
   }
 
   const handleRemoveTech = (tech: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      technologies: prev.technologies?.filter((t) => t !== tech) || [],
-    }))
+    const updatedTechs = formData.technologies?.filter((t) => t !== tech) || []
+    handleFieldChange({ technologies: updatedTechs })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name) return
+    if (!formData.name?.trim()) return
 
-    if (editingId) {
+    if (editingId && editingId !== "new") {
       onChange(
         value.map((p) =>
           p.id === editingId ? { ...p, ...formData, id: editingId } : p
@@ -78,7 +109,7 @@ export function ProjectBuilder({ value, onChange, disabled }: ProjectBuilderProp
     } else {
       const newProject: Project = {
         id: `project-${Date.now()}`,
-        name: formData.name,
+        name: formData.name.trim(),
         shortDescription: formData.shortDescription || "",
         detailedDescription: formData.detailedDescription || "",
         technologies: formData.technologies || [],
@@ -89,7 +120,9 @@ export function ProjectBuilder({ value, onChange, disabled }: ProjectBuilderProp
         featured: formData.featured || false,
         source: "manual",
       }
-      onChange([...value, newProject])
+      const cleanList = value.filter((p) => p.id !== draftIdRef.current)
+      onChange([...cleanList, newProject])
+      draftIdRef.current = `proj-draft-${Date.now()}`
     }
     setEditingId(null)
     resetForm()
@@ -102,8 +135,8 @@ export function ProjectBuilder({ value, onChange, disabled }: ProjectBuilderProp
   }
 
   const handleDelete = (id: string) => {
-    onChange(value.filter((p) => p.id !== id))
-    if (editingId === id) {
+    onChange(value.filter((p) => p.id !== id && p.id !== draftIdRef.current))
+    if (editingId === id || editingId === "new") {
       setEditingId(null)
       resetForm()
     }
@@ -160,7 +193,7 @@ export function ProjectBuilder({ value, onChange, disabled }: ProjectBuilderProp
                   label="Project Name"
                   placeholder="My Awesome Project"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => handleFieldChange({ name: e.target.value })}
                   required
                   disabled={disabled}
                 />
@@ -168,7 +201,7 @@ export function ProjectBuilder({ value, onChange, disabled }: ProjectBuilderProp
                   label="Role"
                   placeholder="Full Stack Developer"
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  onChange={(e) => handleFieldChange({ role: e.target.value })}
                   disabled={disabled}
                 />
               </div>
@@ -176,14 +209,14 @@ export function ProjectBuilder({ value, onChange, disabled }: ProjectBuilderProp
                 label="Short Description"
                 placeholder="A brief one-liner for project cards"
                 value={formData.shortDescription}
-                onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
+                onChange={(e) => handleFieldChange({ shortDescription: e.target.value })}
                 disabled={disabled}
               />
               <Textarea
                 label="Detailed Description"
                 placeholder="Detailed description for project page..."
                 value={formData.detailedDescription}
-                onChange={(e) => setFormData({ ...formData, detailedDescription: e.target.value })}
+                onChange={(e) => handleFieldChange({ detailedDescription: e.target.value })}
                 disabled={disabled}
                 rows={3}
               />
@@ -218,14 +251,14 @@ export function ProjectBuilder({ value, onChange, disabled }: ProjectBuilderProp
                   label="GitHub URL"
                   placeholder="https://github.com/user/repo"
                   value={formData.githubUrl}
-                  onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
+                  onChange={(e) => handleFieldChange({ githubUrl: e.target.value })}
                   disabled={disabled}
                 />
                 <Input
                   label="Live Demo URL"
                   placeholder="https://myproject.com"
                   value={formData.liveDemoUrl}
-                  onChange={(e) => setFormData({ ...formData, liveDemoUrl: e.target.value })}
+                  onChange={(e) => handleFieldChange({ liveDemoUrl: e.target.value })}
                   disabled={disabled}
                 />
               </div>
@@ -233,8 +266,8 @@ export function ProjectBuilder({ value, onChange, disabled }: ProjectBuilderProp
                 label="Project Screenshot / Cover Image (Upload Image)"
                 type="image"
                 value={formData.image}
-                onChange={(dataUrl) => setFormData({ ...formData, image: dataUrl })}
-                onClear={() => setFormData({ ...formData, image: "" })}
+                onChange={(dataUrl) => handleFieldChange({ image: dataUrl })}
+                onClear={() => handleFieldChange({ image: "" })}
                 disabled={disabled}
                 placeholder="Click or drag & drop project screenshot (PNG, JPG, WebP)"
               />
@@ -243,7 +276,7 @@ export function ProjectBuilder({ value, onChange, disabled }: ProjectBuilderProp
                   <input
                     type="checkbox"
                     checked={formData.featured}
-                    onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                    onChange={(e) => handleFieldChange({ featured: e.target.checked })}
                     disabled={disabled}
                     className="rounded border-input"
                   />

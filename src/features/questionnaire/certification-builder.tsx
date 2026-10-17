@@ -17,13 +17,15 @@ interface CertificationBuilderProps {
 }
 
 export function CertificationBuilder({ value, onChange, disabled }: CertificationBuilderProps) {
-  const [editingId, setEditingId] = React.useState<string | null>(null)
+  const [editingId, setEditingId] = React.useState<string | null>(value.length === 0 ? "new" : null)
   const [formData, setFormData] = React.useState<Partial<Certification>>({
     name: "",
     issuingOrganization: "",
     date: "",
     credentialUrl: "",
   })
+
+  const draftIdRef = React.useRef("cert-draft-item")
 
   const resetForm = () => {
     setFormData({
@@ -34,11 +36,38 @@ export function CertificationBuilder({ value, onChange, disabled }: Certificatio
     })
   }
 
+  const handleFieldChange = (updates: Partial<Certification>) => {
+    const updatedForm = { ...formData, ...updates }
+    setFormData(updatedForm)
+
+    if (editingId === "new" && (updatedForm.name?.trim() || updatedForm.issuingOrganization?.trim())) {
+      const draftCert: Certification = {
+        id: draftIdRef.current,
+        name: updatedForm.name?.trim() || "",
+        issuingOrganization: updatedForm.issuingOrganization?.trim() || "",
+        date: updatedForm.date || "",
+        credentialUrl: updatedForm.credentialUrl || "",
+      }
+      const existingIdx = value.findIndex((c) => c.id === draftIdRef.current)
+      if (existingIdx >= 0) {
+        const next = [...value]
+        next[existingIdx] = draftCert
+        onChange(next)
+      } else {
+        onChange([...value, draftCert])
+      }
+    } else if (editingId && editingId !== "new") {
+      onChange(
+        value.map((cert) => (cert.id === editingId ? { ...cert, ...updates } : cert))
+      )
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name || !formData.issuingOrganization) return
+    if (!formData.name?.trim() && !formData.issuingOrganization?.trim()) return
 
-    if (editingId) {
+    if (editingId && editingId !== "new") {
       onChange(
         value.map((cert) =>
           cert.id === editingId ? { ...cert, ...formData, id: editingId } : cert
@@ -47,12 +76,14 @@ export function CertificationBuilder({ value, onChange, disabled }: Certificatio
     } else {
       const newCertification: Certification = {
         id: `cert-${Date.now()}`,
-        name: formData.name!,
-        issuingOrganization: formData.issuingOrganization!,
+        name: formData.name?.trim() || "Certification",
+        issuingOrganization: formData.issuingOrganization?.trim() || "Organization",
         date: formData.date || "",
         credentialUrl: formData.credentialUrl || "",
       }
-      onChange([...value, newCertification])
+      const cleanList = value.filter((c) => c.id !== draftIdRef.current)
+      onChange([...cleanList, newCertification])
+      draftIdRef.current = `cert-draft-${Date.now()}`
     }
     setEditingId(null)
     resetForm()
@@ -64,8 +95,8 @@ export function CertificationBuilder({ value, onChange, disabled }: Certificatio
   }
 
   const handleDelete = (id: string) => {
-    onChange(value.filter((cert) => cert.id !== id))
-    if (editingId === id) {
+    onChange(value.filter((cert) => cert.id !== id && cert.id !== draftIdRef.current))
+    if (editingId === id || editingId === "new") {
       setEditingId(null)
       resetForm()
     }
@@ -103,17 +134,17 @@ export function CertificationBuilder({ value, onChange, disabled }: Certificatio
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 label="Certification Name"
-                placeholder="AWS Solutions Architect"
+                placeholder="AWS Solutions Architect / Full Stack Web Development"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => handleFieldChange({ name: e.target.value })}
                 required
                 disabled={disabled}
               />
               <Input
                 label="Issuing Organization"
-                placeholder="Amazon Web Services"
+                placeholder="Amazon Web Services / Coursera / Udemy"
                 value={formData.issuingOrganization}
-                onChange={(e) => setFormData({ ...formData, issuingOrganization: e.target.value })}
+                onChange={(e) => handleFieldChange({ issuingOrganization: e.target.value })}
                 required
                 disabled={disabled}
               />
@@ -122,14 +153,14 @@ export function CertificationBuilder({ value, onChange, disabled }: Certificatio
                   type="month"
                   label="Date Earned"
                   value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  onChange={(e) => handleFieldChange({ date: e.target.value })}
                   disabled={disabled}
                 />
                 <Input
                   label="Credential URL (Optional)"
                   placeholder="https://credly.com/badges/..."
                   value={formData.credentialUrl}
-                  onChange={(e) => setFormData({ ...formData, credentialUrl: e.target.value })}
+                  onChange={(e) => handleFieldChange({ credentialUrl: e.target.value })}
                   disabled={disabled}
                 />
               </div>
@@ -138,8 +169,8 @@ export function CertificationBuilder({ value, onChange, disabled }: Certificatio
                 type="any"
                 accept=".pdf,image/*"
                 value={formData.credentialUrl?.startsWith("data:") ? formData.credentialUrl : ""}
-                onChange={(dataUrl) => setFormData({ ...formData, credentialUrl: dataUrl })}
-                onClear={() => setFormData({ ...formData, credentialUrl: "" })}
+                onChange={(dataUrl) => handleFieldChange({ credentialUrl: dataUrl })}
+                onClear={() => handleFieldChange({ credentialUrl: "" })}
                 disabled={disabled}
                 placeholder="Upload Certificate PDF or Image"
               />

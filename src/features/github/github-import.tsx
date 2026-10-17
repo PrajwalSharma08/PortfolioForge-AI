@@ -140,30 +140,45 @@ export function GitHubImport({ onComplete, onSkip }: GitHubImportProps) {
             <GitBranch className="h-8 w-8 text-white" />
           </div>
         </div>
-        <h2 className="text-2xl font-bold">Import from GitHub</h2>
-        <p className="text-muted-foreground">
-          Automatically bring your GitHub profile and projects into your portfolio.
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-2">
+          <span>Optional Step</span>
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-bold">Import from GitHub</h2>
+        <p className="text-muted-foreground max-w-md mx-auto text-sm sm:text-base">
+          Automatically pull your repositories, stars, and languages into your portfolio. Don&apos;t have a GitHub or want to enter projects manually? You can skip this anytime!
         </p>
 
-        <div className="flex gap-2 max-w-md mx-auto">
+        <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto pt-2">
           <Input
-            placeholder="GitHub username"
+            placeholder="Enter GitHub username (e.g. torvalds)"
             value={state.username}
             onChange={(e) => setState({ ...state, username: e.target.value })}
+            onKeyDown={(e) => e.key === "Enter" && state.username.trim() && handleConnect()}
             disabled={state.loading}
+            className="text-sm"
           />
-          <Button onClick={handleConnect} disabled={state.loading || !state.username.trim()} className="whitespace-nowrap">
-            {state.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Connect GitHub"}
+          <Button onClick={handleConnect} disabled={state.loading || !state.username.trim()} className="whitespace-nowrap gap-1.5">
+            {state.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <GitBranch className="h-4 w-4" />}
+            {state.loading ? "Connecting..." : "Connect GitHub"}
           </Button>
         </div>
 
         {state.error && (
-          <p className="text-destructive text-sm">{state.error}</p>
+          <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg max-w-md mx-auto space-y-2">
+            <p className="text-destructive text-xs sm:text-sm font-medium">{state.error}</p>
+            <Button size="sm" variant="outline" onClick={onSkip} className="text-xs h-7 gap-1">
+              Skip GitHub & Continue Anyway &rarr;
+            </Button>
+          </div>
         )}
 
-        <Button variant="ghost" onClick={onSkip} className="mt-4">
-          Skip for now
-        </Button>
+        <div className="pt-4 border-t max-w-md mx-auto flex flex-col items-center gap-2">
+          <Button variant="default" size="lg" onClick={onSkip} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:opacity-90 font-semibold gap-2">
+            <span>Continue Without GitHub Profile</span>
+            <span className="text-xs font-normal opacity-90">&rarr;</span>
+          </Button>
+          <p className="text-xs text-muted-foreground">You can always add custom projects, education, and certificates manually in the editor.</p>
+        </div>
       </motion.div>
     )
   }
@@ -315,8 +330,10 @@ export function GitHubImport({ onComplete, onSkip }: GitHubImportProps) {
         <Button variant="outline" onClick={() => setState({ ...state, connected: false })} disabled={state.loading}>
           Change Account
         </Button>
-        <Button onClick={handleContinue} className="w-[200px]">
-          Continue with {state.selectedRepos.size} Projects
+        <Button onClick={handleContinue} className="w-[220px]">
+          {state.selectedRepos.size > 0
+            ? `Continue with ${state.selectedRepos.size} Projects`
+            : "Continue to AI Generation"}
         </Button>
       </div>
     </motion.div>

@@ -9,6 +9,7 @@ import JSZip from "jszip"
 import { saveAs } from "file-saver"
 
 import { SectionRenderer } from "@/components/portfolio/section-renderer"
+import { getAppPath } from "@/lib/utils"
 
 const emptySubscribe = () => () => {}
 const useIsMounted = () => React.useSyncExternalStore(emptySubscribe, () => true, () => false)
@@ -63,7 +64,7 @@ export default function PreviewPage() {
         <div className="text-center space-y-4">
           <h2 className="text-2xl font-bold">No Portfolio Data</h2>
           <p className="text-muted-foreground">Please complete the onboarding flow first.</p>
-          <Button onClick={() => window.location.href = "/onboarding"}>
+          <Button onClick={() => (window.location.href = getAppPath("/onboarding"))}>
             Go to Onboarding
           </Button>
         </div>
@@ -71,7 +72,16 @@ export default function PreviewPage() {
     )
   }
 
-  const sortedSections = [...portfolio.sections].filter((s) => s.enabled).sort((a, b) => a.order - b.order)
+  const sortedSections = [...(portfolio.sections || [])]
+    .map((s) => {
+      if (s.type === "certifications" && portfolio.certifications?.length) return { ...s, enabled: true }
+      if (s.type === "education" && portfolio.education?.length) return { ...s, enabled: true }
+      if (s.type === "projects" && portfolio.projects?.length) return { ...s, enabled: true }
+      if (s.type === "experience" && portfolio.experience?.length) return { ...s, enabled: true }
+      return s
+    })
+    .filter((s) => s.enabled)
+    .sort((a, b) => a.order - b.order)
 
   return (
     <div className="min-h-screen bg-background">
@@ -94,7 +104,7 @@ export default function PreviewPage() {
                 <span className="hidden sm:inline">{downloading ? "Preparing..." : "Download Portfolio"}</span>
                 <span className="sm:hidden">Export</span>
               </Button>
-              <Button variant="default" size="sm" onClick={() => window.location.href = "/editor"} className="gap-1.5 h-8 text-xs px-2.5 sm:px-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:opacity-90">
+              <Button variant="default" size="sm" onClick={() => (window.location.href = getAppPath("/editor"))} className="gap-1.5 h-8 text-xs px-2.5 sm:px-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:opacity-90">
                 <Code className="h-3.5 w-3.5" />
                 Edit
               </Button>
